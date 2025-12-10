@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   MessageSquare, 
@@ -6,12 +7,12 @@ import {
   Wand2, 
   CheckCircle2, 
   BookOpen, 
-  ScanEye,
+  Scale,
   Menu,
   X,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  Coffee
 } from 'lucide-react';
 import { AppMode } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -40,7 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { mode: AppMode.CHAT, label: t('menu_chat'), icon: MessageSquare },
     { mode: AppMode.TRANSLATE, label: t('menu_translate'), icon: Languages },
-    { mode: AppMode.VISION, label: t('menu_vision'), icon: ScanEye },
+    { mode: AppMode.ETIQUETTE, label: t('menu_etiquette'), icon: Scale },
     { mode: AppMode.WRITER, label: t('menu_writer'), icon: PenTool },
     { mode: AppMode.KNOWLEDGE, label: t('menu_knowledge'), icon: BookOpen },
     { mode: AppMode.GRAMMAR, label: t('menu_grammar'), icon: CheckCircle2 },
@@ -61,11 +62,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* --- SIDEBAR CONTAINER --- */}
-      {/* 
-         Logic:
-         - Mobile: Fixed position, slide in/out based on isMobileOpen
-         - Desktop: Relative/Static position, width transition based on isDesktopCollapsed
-      */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-40
         flex flex-col border-r border-slate-800 bg-slate-950 text-slate-300
@@ -154,13 +150,35 @@ const Sidebar: React.FC<SidebarProps> = ({
               </button>
             );
           })}
+
+          {/* DONATION BUTTON */}
+          <div className="pt-4 mt-2 border-t border-slate-800">
+            <a 
+               href="https://saweria.co/" // Replace with actual donation link
+               target="_blank"
+               rel="noopener noreferrer"
+               className={`
+                  group relative flex items-center rounded-xl transition-all duration-300 border border-slate-800 hover:border-yellow-500/50 hover:bg-yellow-900/10
+                  ${isDesktopCollapsed ? 'justify-center p-3' : 'px-4 py-3 gap-3 w-full'}
+                `}
+            >
+                <Coffee size={20} className="text-yellow-500" />
+                <span className={`
+                  whitespace-nowrap font-medium text-sm text-yellow-500 transition-all duration-300
+                  ${isDesktopCollapsed ? 'lg:hidden lg:w-0 opacity-0' : 'block w-auto opacity-100'}
+                `}>
+                  {t('donate_btn')}
+                </span>
+            </a>
+          </div>
+
         </nav>
 
-        {/* --- FOOTER --- */}
+        {/* --- FOOTER (Lang) --- */}
         <div className="p-4 border-t border-slate-900 bg-slate-950/50">
           
           {/* Language Switcher */}
-          <div className={`flex bg-slate-900 rounded-full p-1 border border-slate-800 ${isDesktopCollapsed ? 'flex-col gap-1 rounded-xl' : 'mb-4'}`}>
+          <div className={`flex bg-slate-900 rounded-full p-1 border border-slate-800 ${isDesktopCollapsed ? 'flex-col gap-1 rounded-xl' : ''}`}>
              <button 
                onClick={() => setLanguage('id')} 
                className={`
@@ -171,7 +189,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                `}
                title="Bahasa Indonesia"
              >
-               {isDesktopCollapsed ? 'ID' : 'INDONESIA'}
+               {isDesktopCollapsed ? 'ID' : 'IND'}
              </button>
              <button 
                onClick={() => setLanguage('en')} 
@@ -183,22 +201,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                `}
                title="English"
              >
-               {isDesktopCollapsed ? 'EN' : 'ENGLISH'}
+               {isDesktopCollapsed ? 'EN' : 'ENG'}
              </button>
           </div>
           
-          {/* User Info / Version */}
-          {!isDesktopCollapsed && (
-            <div className="flex items-center gap-3 opacity-50 hover:opacity-100 transition-opacity cursor-default animate-in fade-in">
-               <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-500">
-                  AI
-               </div>
-               <div className="overflow-hidden">
-                  <p className="text-xs font-medium text-slate-400 truncate">Powered by Gemini</p>
-                  <p className="text-[10px] text-slate-600 truncate">v1.0.0 Public Preview</p>
-               </div>
-            </div>
-          )}
         </div>
       </aside>
 

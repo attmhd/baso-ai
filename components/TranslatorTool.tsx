@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowRightLeft, Copy, Loader2, Sparkles, X, Languages, MoveRight } from 'lucide-react';
 import { AppMode } from '../types';
@@ -25,7 +26,7 @@ const TranslatorTool: React.FC = () => {
         setOutputText(fullText);
       }
     } catch (error) {
-      setOutputText("Maaf, terjadi kesalahan jaringan.");
+      setOutputText(t('error_network'));
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +68,7 @@ const TranslatorTool: React.FC = () => {
                 {/* Input Section */}
                 <div className="flex-1 flex flex-col p-6 bg-white dark:bg-slate-800 relative group">
                     <div className="flex justify-between items-center mb-4">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded">Auto-Detect</span>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded">{t('trans_auto')}</span>
                         {inputText && (
                             <button onClick={handleClear} className="text-slate-300 hover:text-red-500 transition-colors">
                                 <X size={20} />
@@ -94,13 +95,13 @@ const TranslatorTool: React.FC = () => {
                 {/* Output Section */}
                 <div className="flex-1 flex flex-col p-6 bg-yellow-50/50 dark:bg-slate-900/50 relative min-h-[300px] lg:min-h-auto">
                     <div className="flex justify-between items-center mb-4">
-                         <span className="text-xs font-bold text-yellow-700 dark:text-yellow-500 uppercase tracking-widest px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 rounded">Minang (Padang)</span>
+                         <span className="text-xs font-bold text-yellow-700 dark:text-yellow-500 uppercase tracking-widest px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 rounded">{t('trans_minang')}</span>
                          {outputText && (
                             <button 
                                 onClick={() => navigator.clipboard.writeText(outputText)}
                                 className="text-slate-400 hover:text-yellow-600 transition-colors flex items-center gap-1 text-xs font-medium"
                             >
-                                <Copy size={16} /> Copy
+                                <Copy size={16} /> {t('copy')}
                             </button>
                         )}
                     </div>
@@ -109,7 +110,7 @@ const TranslatorTool: React.FC = () => {
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-3">
                                 <Loader2 className="animate-spin text-yellow-500" size={32} />
-                                <span className="text-sm font-medium animate-pulse">Menerjemahkan konteks...</span>
+                                <span className="text-sm font-medium animate-pulse">{t('trans_loading')}</span>
                             </div>
                         ) : outputText ? (
                             <div className="prose prose-xl dark:prose-invert max-w-none">
@@ -126,7 +127,7 @@ const TranslatorTool: React.FC = () => {
                             <div className="h-full flex items-center justify-center opacity-30">
                                 <div className="text-center">
                                     <Sparkles size={48} className="mx-auto mb-2 text-slate-400" />
-                                    <p className="text-slate-400 font-medium">Hasil terjemahan akan muncul disini</p>
+                                    <p className="text-slate-400 font-medium">{t('trans_empty')}</p>
                                 </div>
                             </div>
                         )}

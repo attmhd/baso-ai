@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { 
   MessageSquare, 
   Languages, 
-  ScanEye, 
+  Scale, 
   ArrowRight, 
   BookOpen, 
   Sparkles, 
@@ -14,7 +15,8 @@ import {
   PenTool,
   Wand2,
   CheckCircle2,
-  MoveRight
+  MoveRight,
+  Heart
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -203,12 +205,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               desc={t('menu_translate_desc')}
             />
              <RichFeatureCard 
-              icon={<ScanEye size={28} />}
-              gradient="from-red-500 to-marawa-red"
-              shadowColor="shadow-red-500/25"
-              tag="Multimodal"
-              title={t('menu_vision')}
-              desc={t('menu_vision_desc')}
+              icon={<Scale size={28} />}
+              gradient="from-indigo-500 to-indigo-700"
+              shadowColor="shadow-indigo-500/25"
+              tag="Etiquette"
+              title={t('menu_etiquette')}
+              desc={t('menu_etiquette_desc')}
             />
             <RichFeatureCard 
               icon={<PenTool size={28} />}
@@ -265,7 +267,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
             <FooterColumn 
               title={t('footer_product')} 
-              links={[t('menu_chat'), t('menu_vision'), t('menu_translate'), t('menu_writer')]} 
+              links={[t('menu_chat'), t('menu_etiquette'), t('menu_translate'), t('menu_writer')]} 
               action={onStart}
             />
             
@@ -274,17 +276,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               links={[t('footer_blog'), t('footer_community'), t('footer_about')]} 
             />
 
-            <FooterColumn 
-              title={t('footer_legal')} 
-              links={[t('footer_privacy'), t('footer_terms'), t('footer_contact')]} 
-            />
+            <div className="col-span-1">
+                <h4 className="font-bold text-white mb-6">{t('support_us')}</h4>
+                <p className="text-sm text-slate-400 mb-4">{t('donate_desc')}</p>
+                <a 
+                   href="https://saweria.co/" // Replace with actual donation link
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-yellow-500/30 transition-all hover:-translate-y-1"
+                >
+                    <Heart size={18} fill="currentColor" />
+                    {t('donate_btn')}
+                </a>
+            </div>
           </div>
 
           <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
             <p>© {new Date().getFullYear()} Baso.AI. All rights reserved.</p>
             <div className="flex gap-6">
                <span>Padang, West Sumatra</span>
-               <span>Powered by Google Gemini</span>
+               <span>Powered by <a href='https://natta.studio'>Natta std.</a></span>
             </div>
           </div>
         </div>

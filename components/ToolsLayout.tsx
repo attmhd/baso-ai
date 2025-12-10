@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { AppMode } from '../types';
 import { Check, Wand2, Loader2, Play, CheckCircle2, Copy, Keyboard, Sparkles } from 'lucide-react';
@@ -20,8 +21,9 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
 
     const title = mode === AppMode.GRAMMAR ? t('grammar_title') : t('auto_title');
     const placeholder = mode === AppMode.GRAMMAR 
-        ? "Contoh: Ambo pai ka pasa mambali lado..." 
-        : "Mulai ketik kalimat Minang, Baso akan melengkapinya otomatis...";
+        ? t('placeholder_grammar')
+        : t('placeholder_auto');
+    const subtitle = mode === AppMode.GRAMMAR ? t('tool_util_sub') : t('tool_auto_sub');
 
     const ThemeIcon = mode === AppMode.GRAMMAR ? CheckCircle2 : Wand2;
     const iconColor = mode === AppMode.GRAMMAR ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400';
@@ -84,7 +86,7 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                 setResult(fullText);
             }
         } catch (e) {
-            setResult("Maaf, terjadi kesalahan.");
+            setResult(t('error_network'));
         } finally {
             setIsLoading(false);
         }
@@ -125,14 +127,14 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                     <div>
                         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{title}</h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wide uppercase">
-                            {mode === AppMode.AUTOCOMPLETE ? "Real-time AI Completion" : "AI Utility Tool"}
+                            {subtitle}
                         </p>
                     </div>
                 </div>
                 {mode === AppMode.AUTOCOMPLETE && (
                     <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
                         <Keyboard size={14} />
-                        <span>Tekan TAB untuk terima saran</span>
+                        <span>{t('tool_tab_hint')}</span>
                     </div>
                 )}
             </div>
@@ -144,7 +146,7 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                     <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden group focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-slate-200 dark:focus-within:ring-slate-700 transition-all relative">
                         <div className="p-6">
                             <label className="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wider">
-                                {mode === AppMode.AUTOCOMPLETE ? "Magic Editor" : "Input"}
+                                {mode === AppMode.AUTOCOMPLETE ? t('tool_magic_label') : t('tool_input_label')}
                             </label>
                             
                             <textarea
@@ -162,7 +164,7 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                                     {isLoading ? (
                                         <div className="flex items-center gap-2 text-purple-500 text-sm font-medium">
                                             <Loader2 className="animate-spin" size={14} />
-                                            <span>Baso sedang berpikir...</span>
+                                            <span>{t('tool_thinking')}</span>
                                         </div>
                                     ) : (
                                         <div 
@@ -171,7 +173,7 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                                         >
                                             <div className="flex items-center gap-2 text-xs uppercase font-bold text-purple-500 mb-1">
                                                 <Sparkles size={12} />
-                                                <span>Saran (Tekan Tab):</span>
+                                                <span>{t('tool_suggestion_label')}:</span>
                                             </div>
                                             <div className="p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-xl text-lg text-purple-700 dark:text-purple-300 font-medium flex items-center justify-between hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors">
                                                 <span>{result.replace(/^\./, '')}</span>
@@ -188,7 +190,7 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                         {/* Button ONLY for Grammar Mode */}
                         {mode === AppMode.GRAMMAR && (
                             <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
-                                <span className="text-xs text-slate-400 hidden sm:block">Baso AI will analyze structure & context</span>
+                                <span className="text-xs text-slate-400 hidden sm:block">{t('tool_grammar_hint')}</span>
                                 <button
                                     onClick={handleGrammarCheck}
                                     disabled={isLoading || !input.trim()}
@@ -198,7 +200,7 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                                     `}
                                 >
                                     {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Play size={18} fill="currentColor" />}
-                                    Check Grammar
+                                    {t('tool_check_btn')}
                                 </button>
                             </div>
                         )}
@@ -216,7 +218,7 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                                          <div className="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">
                                             <CheckCircle2 size={20} />
                                          </div>
-                                         <span className="text-sm font-bold uppercase tracking-wider text-slate-500">Analysis Result</span>
+                                         <span className="text-sm font-bold uppercase tracking-wider text-slate-500">{t('tool_result_label')}</span>
                                      </div>
                                      {result && (
                                         <button 
@@ -235,7 +237,7 @@ const ToolsLayout: React.FC<ToolsLayoutProps> = ({ mode }) => {
                                             <div className="absolute inset-0 bg-green-400 blur-xl opacity-20 animate-pulse"></div>
                                             <Loader2 className="animate-spin text-green-500 relative z-10" size={40} />
                                         </div>
-                                        <span className="text-sm font-medium animate-pulse text-slate-500">Sedang memeriksa tata bahasa...</span>
+                                        <span className="text-sm font-medium animate-pulse text-slate-500">{t('tool_analyzing')}</span>
                                     </div>
                                 ) : (
                                     <div className="prose prose-lg dark:prose-invert max-w-none">

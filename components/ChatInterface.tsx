@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Send, Image as ImageIcon, Loader2, Bot, User, Sparkles, PenTool, BookOpen, Scroll, Feather, History, Utensils, Users, UploadCloud, GraduationCap, MessageCircle } from 'lucide-react';
+import { Send, Image as ImageIcon, Loader2, Bot, User, Sparkles, PenTool, BookOpen, Scroll, Feather, History, Utensils, Users, UploadCloud, GraduationCap, MessageCircle, Quote } from 'lucide-react';
 import { AppMode, Message } from '../types';
 import { streamResponse } from '../services/geminiService';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -46,7 +46,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
           data: base64Data,
           mimeType: file.type
         });
-        // If in Vision mode and empty, automatically focus input or even prompt user
       };
       reader.readAsDataURL(file);
     }
@@ -107,7 +106,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
     } catch (error) {
         setMessages(prev => prev.map(m => 
             m.id === modelMsgId 
-            ? { ...m, content: "Maaf Sanak, ado gangguan jaringan. Cubo ulang liak yo. 🙏", isLoading: false } 
+            ? { ...m, content: t('error_network') + " 🙏", isLoading: false } 
             : m
         ));
     } finally {
@@ -132,14 +131,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                     <Feather size={32} />
                 </div>
                 <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 text-center">{t('chat_welcome_writer')}</h3>
-                <p className="text-slate-500 text-center max-w-md mb-8">Pilih genre sastra Minangkabau di bawah ini untuk memulai.</p>
+                <p className="text-slate-500 text-center max-w-md mb-8">{t('writer_subtitle')}</p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
                     {[
-                        { icon: Sparkles, label: t('writer_opt_pantun'), prompt: 'Buatkan pantun Minang tentang...' },
-                        { icon: BookOpen, label: t('writer_opt_cerpen'), prompt: 'Tuliskan cerpen pendek berbahasa Minang dengan tema...' },
-                        { icon: Scroll, label: t('writer_opt_pidato'), prompt: 'Buatkan naskah pidato adat (Pasambahan) untuk acara...' },
-                        { icon: PenTool, label: t('writer_opt_surat'), prompt: 'Buatkan surat resmi dalam bahasa Minang untuk...' }
+                        { icon: Sparkles, label: t('writer_opt_pantun'), prompt: t('prompt_pantun') },
+                        { icon: BookOpen, label: t('writer_opt_cerpen'), prompt: t('prompt_cerpen') },
+                        { icon: Scroll, label: t('writer_opt_pidato'), prompt: t('prompt_pidato') },
+                        { icon: PenTool, label: t('writer_opt_surat'), prompt: t('prompt_surat') }
                     ].map((item, idx) => (
                         <button 
                             key={idx}
@@ -164,14 +163,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                     <BookOpen size={32} />
                 </div>
                 <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 text-center">{t('chat_welcome_knowledge')}</h3>
-                <p className="text-slate-500 text-center max-w-md mb-8">Eksplorasi kekayaan intelektual dan sejarah Minangkabau.</p>
+                <p className="text-slate-500 text-center max-w-md mb-8">{t('know_subtitle')}</p>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl">
                      {[
-                        { icon: History, label: 'Sejarah', prompt: 'Ceritakan sejarah kerajaan Pagaruyung ringkas...' },
-                        { icon: Utensils, label: 'Kuliner', prompt: 'Jelaskan filosofi di balik masakan Rendang...' },
-                        { icon: Scroll, label: 'Adat', prompt: 'Jelaskan sistem matrilineal di Minangkabau...' },
-                        { icon: Users, label: 'Tokoh', prompt: 'Siapa saja tokoh pahlawan nasional dari Minangkabau?' }
+                        { icon: History, label: t('know_opt_history'), prompt: t('prompt_history') },
+                        { icon: Utensils, label: t('know_opt_food'), prompt: t('prompt_culinary') },
+                        { icon: Scroll, label: t('know_opt_customs'), prompt: t('prompt_customs') },
+                        { icon: Users, label: t('know_opt_figures'), prompt: t('prompt_figures') }
                     ].map((item, idx) => (
                         <button 
                             key={idx}
@@ -181,26 +180,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                             <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-full text-green-600 group-hover:scale-110 transition-transform">
                                 <item.icon size={24} />
                             </div>
-                            <span className="font-semibold text-slate-700 dark:text-slate-200">{item.label}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-200 text-center">{item.label}</span>
                         </button>
                     ))}
-                </div>
-            </div>
-        );
-    }
-
-    if (mode === AppMode.VISION) {
-        return (
-             <div className="flex flex-col items-center justify-center h-full p-6 animate-in fade-in zoom-in duration-500">
-                <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="group cursor-pointer w-full max-w-xl aspect-video border-3 border-dashed border-slate-300 dark:border-slate-700 rounded-3xl flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-marawa-red transition-all"
-                >
-                    <div className="w-20 h-20 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                        <UploadCloud size={32} className="text-marawa-red" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-700 dark:text-slate-200">{t('vision_btn_select')}</h3>
-                    <p className="text-slate-500 mt-2 text-sm text-center max-w-xs">{t('vision_upload_desc')}</p>
                 </div>
             </div>
         );
@@ -225,7 +207,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                 
                 {/* BEGINNER CARD */}
                 <button 
-                  onClick={() => handleStarterClick("Halo Baso, saya ingin belajar Bahasa Minang dari dasar. Tolong ajarkan kata-kata sapaan sehari-hari.")}
+                  onClick={() => handleStarterClick(t('prompt_beginner'))}
                   className="group relative p-8 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700 hover:border-marawa-gold transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 text-left flex flex-col items-start"
                 >
                     <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -244,7 +226,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
 
                 {/* NATIVE CARD */}
                 <button 
-                  onClick={() => handleStarterClick("Assalamualaikum Sanak! Baa kaba? Ota lamak wak lah.")}
+                  onClick={() => handleStarterClick(t('prompt_native'))}
                   className="group relative p-8 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700 hover:border-marawa-red transition-all duration-300 hover:shadow-xl hover:shadow-red-500/10 text-left flex flex-col items-start"
                 >
                     <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -297,7 +279,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
 
             {/* Bubble */}
             <div
-              className={`max-w-[85%] lg:max-w-[70%] rounded-2xl px-6 py-4 shadow-sm ${
+              className={`max-w-[95%] lg:max-w-[75%] rounded-2xl px-6 py-4 shadow-sm ${
                 msg.role === 'user'
                   ? 'bg-gradient-to-br from-marawa-red to-red-600 text-white rounded-tr-none shadow-red-900/10'
                   : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200 dark:border-slate-700 shadow-slate-200/50 dark:shadow-none'
@@ -320,11 +302,42 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                       <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{animationDelay: '150ms'}}/>
                       <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{animationDelay: '300ms'}}/>
                    </div>
-                   <span className="font-medium">Baso sadang bapikia...</span>
+                   <span className="font-medium">{t('chat_loading')}</span>
                 </div>
               ) : (
-                <div className={`prose prose-lg dark:prose-invert max-w-none leading-relaxed ${mode === AppMode.WRITER && msg.role === 'model' ? 'font-serif' : ''}`}>
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                <div className={`prose prose-lg dark:prose-invert max-w-none leading-relaxed`}>
+                  <ReactMarkdown
+                    components={{
+                        // Custom Blockquote for Quotes/Pantun
+                        blockquote: ({node, ...props}) => (
+                            <div className="relative my-4 group">
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-marawa-red to-marawa-gold rounded-full opacity-80"></div>
+                                <div className="pl-6 py-2">
+                                    <div className="absolute -top-3 left-4 text-marawa-gold/20">
+                                        <Quote size={32} fill="currentColor" />
+                                    </div>
+                                    <blockquote 
+                                        className="text-xl md:text-2xl text-slate-700 dark:text-slate-200 font-serif italic leading-relaxed m-0 relative z-10" 
+                                        {...props} 
+                                    />
+                                </div>
+                            </div>
+                        ),
+                        // Enhanced Headers
+                        h1: ({node, ...props}) => <h1 className="text-2xl font-bold mb-4 mt-6 text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-700" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-xl font-bold mb-3 mt-6 text-slate-800 dark:text-slate-100" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-lg font-bold mb-2 mt-4 text-marawa-red/90 uppercase tracking-wide text-xs" {...props} />,
+                        // Enhanced Lists
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 space-y-2 mb-4 marker:text-marawa-gold" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-2 mb-4 marker:font-bold marker:text-slate-500" {...props} />,
+                        // Strong/Bold
+                        strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
+                        // Paragraphs
+                        p: ({node, ...props}) => <p className="mb-4 last:mb-0" {...props} />
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
                 </div>
               )}
             </div>
@@ -342,8 +355,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                         <ImageIcon size={20} className="text-slate-500"/>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Image Attached</span>
-                        <span className="text-[10px] text-slate-400">Ready to analyze</span>
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{t('image_attached')}</span>
+                        <span className="text-[10px] text-slate-400">{t('ready_analyze')}</span>
                     </div>
                     <button 
                     onClick={() => {
@@ -410,7 +423,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
             
             <div className="text-center mt-3">
                 <p className="text-[10px] uppercase tracking-widest text-slate-300 dark:text-slate-600 font-bold">
-                    Baso.AI <span className="mx-2">•</span> Gemini Powered
+                    {t('footer_tag')}
                 </p>
             </div>
          </div>

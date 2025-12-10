@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
 import TranslatorTool from './components/TranslatorTool';
 import ToolsLayout from './components/ToolsLayout';
-import VisionTool from './components/VisionTool';
+import EtiquetteTool from './components/EtiquetteTool';
 import LandingPage from './components/LandingPage';
 import { AppMode } from './types';
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -29,8 +30,8 @@ const AppContent: React.FC = () => {
       case AppMode.GRAMMAR:
       case AppMode.AUTOCOMPLETE:
         return <ToolsLayout key={activeMode} mode={activeMode} />;
-      case AppMode.VISION:
-        return <VisionTool />;
+      case AppMode.ETIQUETTE:
+        return <EtiquetteTool />;
       default:
         return <ChatInterface mode={AppMode.CHAT} />;
     }
@@ -53,7 +54,6 @@ const AppContent: React.FC = () => {
       
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full relative w-full overflow-hidden transition-all duration-300">
-        {/* Mobile Header Overlay Trigger (Invisible but blocks clicks if needed, currently handled by Sidebar overlay) */}
         {renderContent()}
       </main>
     </div>

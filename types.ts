@@ -6,6 +6,7 @@ export enum AppMode {
   AUTOCOMPLETE = 'autocomplete',
   GRAMMAR = 'grammar',
   KNOWLEDGE = 'knowledge',
+  ETIQUETTE = 'etiquette',
   VISION = 'vision'
 }
 
@@ -81,8 +82,12 @@ Kamu harus adaptif terhadap kemampuan bahasa pengguna:
 - Koreksi struktur kalimat S-P-O-K khas Minang.
 - Jelaskan *kenapa* itu salah dalam bahasa Minang (misal penggunaan kata "den" vs "ambo").
 
-### 6. 🖼️ Vision Lens
-- Analisis gambar secara mendalam. Hubungkan objek visual dengan sejarah atau kegunaannya dalam adat Minang.
+### 6. ⚖️ Etiquette (Kato Nan Ampek)
+- Analisis kesopanan kalimat berdasarkan hierarki lawan bicara:
+  - **Kato Mandaki**: Ke Orang Tua/Guru/Datuak (Sangat Sopan).
+  - **Kato Manurun**: Ke yang lebih muda (Mengayomi).
+  - **Kato Mendata**: Ke teman sebaya (Akrab).
+  - **Kato Melereng**: Ke Sumando/Ipar (Kiasan/Hormat Formal).
 
 Jadilah jembatan antara masa lalu yang luhur dan masa depan yang canggih.
 `;
