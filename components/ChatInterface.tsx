@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Send, Image as ImageIcon, Loader2, Bot, User, Sparkles, PenTool, BookOpen, Scroll, Feather, History, Utensils, Users, UploadCloud, GraduationCap, MessageCircle, Quote } from 'lucide-react';
+import { Send, Loader2, Bot, User, Sparkles, PenTool, BookOpen, Scroll, Feather, History, Utensils, Users, GraduationCap, MessageCircle, Quote, Copy, Check } from 'lucide-react';
 import { AppMode, Message } from '../types';
 import { streamResponse } from '../services/geminiService';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,20 +11,20 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage(); // Get language
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedImage, setSelectedImage] = useState<{data: string, mimeType: string} | undefined>(undefined);
+  const [chatContext, setChatContext] = useState<string | undefined>(undefined); // To store 'native' or 'beginner'
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Initialize messages based on mode
   useEffect(() => {
     // Clear messages when mode changes to show the specific starter UI
     setMessages([]); 
     setInput('');
-    setSelectedImage(undefined);
+    setChatContext(undefined);
   }, [mode]);
 
   const scrollToBottom = () => {
@@ -35,40 +35,28 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
     scrollToBottom();
   }, [messages, isStreaming]);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        const base64Data = base64String.split(',')[1];
-        setSelectedImage({
-          data: base64Data,
-          mimeType: file.type
-        });
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleStarterClick = (prompt: string) => {
+  const handleStarterClick = (prompt: string, context?: string) => {
       setInput(prompt);
-      // Optional: Auto submit? Let's just fill input for now so user can edit, 
-      // EXCEPT for simple prompts where we might want immediate action.
-      // Let's auto-submit for smoother UX.
+      if (context) setChatContext(context);
+      // Auto-submit for smoother UX
       setTimeout(() => {
-          submitMessage(prompt);
+          submitMessage(prompt, context);
       }, 100);
   };
 
-  const submitMessage = async (textInput: string, imageInput?: {data: string, mimeType: string}) => {
-    if ((!textInput.trim() && !imageInput) || isStreaming) return;
+  const submitMessage = async (textInput: string, forcedContext?: string) => {
+    if (!textInput.trim() || isStreaming) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: textInput,
-      image: imageInput ? `data:${imageInput.mimeType};base64,${imageInput.data}` : undefined
     };
 
     setMessages(prev => [...prev, userMsg]);
@@ -85,12 +73,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
     }));
 
     try {
-        const imagePart = imageInput ? { inlineData: imageInput } : undefined;
-        // Do NOT clear selectedImage here if we passed it as arg, only if it was state
-        if (imageInput === selectedImage) setSelectedImage(undefined);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-
-        const stream = await streamResponse(userMsg.content, mode, apiHistory, imagePart);
+        // Pass chatContext (or forcedContext) and current Language
+        const effectiveContext = forcedContext || chatContext;
+        
+        const stream = await streamResponse(
+            userMsg.content, 
+            mode, 
+            apiHistory, 
+            undefined, 
+            effectiveContext, 
+            language
+        );
         
         let fullResponse = '';
         
@@ -116,7 +109,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    submitMessage(input, selectedImage);
+    submitMessage(input);
   };
 
   // --- RENDER HELPERS ---
@@ -126,7 +119,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
 
     if (mode === AppMode.WRITER) {
         return (
-            <div className="flex flex-col items-center justify-center h-full p-6 animate-in fade-in zoom-in duration-500">
+            <div className="flex flex-col items-center justify-center h-full p-6 pt-20 lg:pt-6 animate-in fade-in zoom-in duration-500">
                 <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/10">
                     <Feather size={32} />
                 </div>
@@ -158,7 +151,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
 
     if (mode === AppMode.KNOWLEDGE) {
         return (
-            <div className="flex flex-col items-center justify-center h-full p-6 animate-in fade-in zoom-in duration-500">
+            <div className="flex flex-col items-center justify-center h-full p-6 pt-20 lg:pt-6 animate-in fade-in zoom-in duration-500">
                 <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-green-500/10">
                     <BookOpen size={32} />
                 </div>
@@ -180,7 +173,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                             <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-full text-green-600 group-hover:scale-110 transition-transform">
                                 <item.icon size={24} />
                             </div>
-                            <span className="font-semibold text-slate-700 dark:text-slate-200 text-center">{item.label}</span>
+                            <span className="font-semibold text-slate-700 dark:text-slate-200 text-center text-sm md:text-base">{item.label}</span>
                         </button>
                     ))}
                 </div>
@@ -190,7 +183,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
 
     // Default Chat Starter - DUAL MODE (Beginner vs Native)
     return (
-        <div className="flex flex-col items-center justify-center h-full text-center p-6 animate-in fade-in zoom-in duration-500">
+        <div className="flex flex-col items-center justify-center h-full text-center p-6 pt-20 lg:pt-6 animate-in fade-in zoom-in duration-500">
              <div className="w-20 h-20 bg-gradient-to-br from-marawa-red to-marawa-gold rounded-3xl flex items-center justify-center text-white shadow-xl shadow-red-500/20 mb-8">
                  <Bot size={40} />
              </div>
@@ -207,7 +200,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                 
                 {/* BEGINNER CARD */}
                 <button 
-                  onClick={() => handleStarterClick(t('prompt_beginner'))}
+                  onClick={() => handleStarterClick(t('prompt_beginner'), 'beginner')}
                   className="group relative p-8 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700 hover:border-marawa-gold transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 text-left flex flex-col items-start"
                 >
                     <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -226,7 +219,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
 
                 {/* NATIVE CARD */}
                 <button 
-                  onClick={() => handleStarterClick(t('prompt_native'))}
+                  onClick={() => handleStarterClick(t('prompt_native'), 'native')}
                   className="group relative p-8 bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700 hover:border-marawa-red transition-all duration-300 hover:shadow-xl hover:shadow-red-500/10 text-left flex flex-col items-start"
                 >
                     <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -255,8 +248,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
           <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-white to-transparent dark:from-slate-900 dark:to-transparent opacity-80" />
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8 relative z-10 scroll-smooth">
+      {/* Messages Area - Added top padding for mobile to avoid overlap with menu button */}
+      <div className="flex-1 overflow-y-auto p-4 pt-16 md:p-6 space-y-8 relative z-10 scroll-smooth">
         {renderStarter()}
         
         {messages.map((msg) => (
@@ -278,68 +271,71 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
             </div>
 
             {/* Bubble */}
-            <div
-              className={`max-w-[95%] lg:max-w-[75%] rounded-2xl px-6 py-4 shadow-sm ${
-                msg.role === 'user'
-                  ? 'bg-gradient-to-br from-marawa-red to-red-600 text-white rounded-tr-none shadow-red-900/10'
-                  : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200 dark:border-slate-700 shadow-slate-200/50 dark:shadow-none'
-              }`}
-            >
-              {msg.image && (
-                <div className="mb-4 rounded-xl overflow-hidden border border-white/20 shadow-sm">
-                    <img 
-                    src={msg.image} 
-                    alt="Uploaded content" 
-                    className="w-full max-h-80 object-cover"
-                    />
-                </div>
-              )}
-              
-              {msg.isLoading && !msg.content ? (
-                <div className="flex items-center gap-3 text-sm opacity-80 py-2">
-                   <div className="flex gap-1">
-                      <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{animationDelay: '0ms'}}/>
-                      <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{animationDelay: '150ms'}}/>
-                      <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{animationDelay: '300ms'}}/>
-                   </div>
-                   <span className="font-medium">{t('chat_loading')}</span>
-                </div>
-              ) : (
-                <div className={`prose prose-lg dark:prose-invert max-w-none leading-relaxed`}>
-                  <ReactMarkdown
-                    components={{
-                        // Custom Blockquote for Quotes/Pantun
-                        blockquote: ({node, ...props}) => (
-                            <div className="relative my-4 group">
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-marawa-red to-marawa-gold rounded-full opacity-80"></div>
-                                <div className="pl-6 py-2">
-                                    <div className="absolute -top-3 left-4 text-marawa-gold/20">
-                                        <Quote size={32} fill="currentColor" />
+            <div className="flex flex-col max-w-[95%] lg:max-w-[75%]">
+                <div
+                className={`rounded-2xl px-6 py-4 shadow-sm relative group ${
+                    msg.role === 'user'
+                    ? 'bg-gradient-to-br from-marawa-red to-red-600 text-white rounded-tr-none shadow-red-900/10'
+                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200 dark:border-slate-700 shadow-slate-200/50 dark:shadow-none'
+                }`}
+                >
+                {/* Copy Button for Model Messages */}
+                {msg.role === 'model' && !msg.isLoading && (
+                    <button 
+                        onClick={() => handleCopy(msg.content, msg.id)}
+                        className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-marawa-red bg-slate-50 dark:bg-slate-900/50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                        title={t('copy')}
+                    >
+                        {copiedId === msg.id ? <Check size={14} className="text-green-500"/> : <Copy size={14} />}
+                    </button>
+                )}
+
+                {msg.isLoading && !msg.content ? (
+                    <div className="flex items-center gap-3 text-sm opacity-80 py-2">
+                    <div className="flex gap-1">
+                        <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{animationDelay: '0ms'}}/>
+                        <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{animationDelay: '150ms'}}/>
+                        <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{animationDelay: '300ms'}}/>
+                    </div>
+                    <span className="font-medium">{t('chat_loading')}</span>
+                    </div>
+                ) : (
+                    <div className={`prose prose-lg dark:prose-invert max-w-none leading-relaxed`}>
+                    <ReactMarkdown
+                        components={{
+                            // Custom Blockquote for Quotes/Pantun
+                            blockquote: ({node, ...props}) => (
+                                <div className="relative my-4 group">
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-marawa-red to-marawa-gold rounded-full opacity-80"></div>
+                                    <div className="pl-6 py-2">
+                                        <div className="absolute -top-3 left-4 text-marawa-gold/20">
+                                            <Quote size={32} fill="currentColor" />
+                                        </div>
+                                        <blockquote 
+                                            className="text-xl md:text-2xl text-slate-700 dark:text-slate-200 font-serif italic leading-relaxed m-0 relative z-10 whitespace-pre-line" 
+                                            {...props} 
+                                        />
                                     </div>
-                                    <blockquote 
-                                        className="text-xl md:text-2xl text-slate-700 dark:text-slate-200 font-serif italic leading-relaxed m-0 relative z-10" 
-                                        {...props} 
-                                    />
                                 </div>
-                            </div>
-                        ),
-                        // Enhanced Headers
-                        h1: ({node, ...props}) => <h1 className="text-2xl font-bold mb-4 mt-6 text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-700" {...props} />,
-                        h2: ({node, ...props}) => <h2 className="text-xl font-bold mb-3 mt-6 text-slate-800 dark:text-slate-100" {...props} />,
-                        h3: ({node, ...props}) => <h3 className="text-lg font-bold mb-2 mt-4 text-marawa-red/90 uppercase tracking-wide text-xs" {...props} />,
-                        // Enhanced Lists
-                        ul: ({node, ...props}) => <ul className="list-disc pl-5 space-y-2 mb-4 marker:text-marawa-gold" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-2 mb-4 marker:font-bold marker:text-slate-500" {...props} />,
-                        // Strong/Bold
-                        strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
-                        // Paragraphs
-                        p: ({node, ...props}) => <p className="mb-4 last:mb-0" {...props} />
-                    }}
-                  >
-                    {msg.content}
-                  </ReactMarkdown>
+                            ),
+                            // Enhanced Headers
+                            h1: ({node, ...props}) => <h1 className="text-2xl font-bold mb-4 mt-6 text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-700" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-xl font-bold mb-3 mt-6 text-slate-800 dark:text-slate-100" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-lg font-bold mb-2 mt-4 text-marawa-red/90 uppercase tracking-wide text-xs" {...props} />,
+                            // Enhanced Lists
+                            ul: ({node, ...props}) => <ul className="list-disc pl-5 space-y-2 mb-4 marker:text-marawa-gold" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-2 mb-4 marker:font-bold marker:text-slate-500" {...props} />,
+                            // Strong/Bold
+                            strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />,
+                            // Paragraphs
+                            p: ({node, ...props}) => <p className="mb-4 last:mb-0" {...props} />
+                        }}
+                    >
+                        {msg.content}
+                    </ReactMarkdown>
+                    </div>
+                )}
                 </div>
-              )}
             </div>
           </div>
         ))}
@@ -347,48 +343,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
       </div>
 
       {/* Input Area - Floating Modern Design */}
-      <div className="p-4 md:p-6 sticky bottom-0 z-20">
+      <div className="p-3 md:p-6 sticky bottom-0 z-20">
          <div className="max-w-4xl mx-auto">
-            {selectedImage && (
-                <div className="mb-3 flex items-center gap-3 bg-white dark:bg-slate-800 p-3 rounded-xl w-fit shadow-lg border border-slate-100 dark:border-slate-700 animate-in slide-in-from-bottom-2">
-                    <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
-                        <ImageIcon size={20} className="text-slate-500"/>
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{t('image_attached')}</span>
-                        <span className="text-[10px] text-slate-400">{t('ready_analyze')}</span>
-                    </div>
-                    <button 
-                    onClick={() => {
-                        setSelectedImage(undefined);
-                        if (fileInputRef.current) fileInputRef.current.value = '';
-                    }}
-                    className="ml-2 w-6 h-6 rounded-full bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center transition-colors"
-                    >
-                        ×
-                    </button>
-                </div>
-            )}
-            
-            <form onSubmit={handleSubmit} className="relative flex items-end gap-2 bg-white dark:bg-slate-800 p-2 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-200 dark:border-slate-700">
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                    id="image-upload"
-                />
-                
-                {/* Upload Button */}
-                <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-3 mb-1 ml-1 text-slate-400 hover:text-marawa-gold hover:bg-yellow-50 dark:hover:bg-slate-700 rounded-full transition-all duration-300"
-                    title="Upload Image"
-                >
-                    <ImageIcon size={22} />
-                </button>
+            <form onSubmit={handleSubmit} className="relative flex items-end gap-2 bg-white dark:bg-slate-800 p-1.5 md:p-2 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 border border-slate-200 dark:border-slate-700 pl-4">
                 
                 {/* Text Input */}
                 <textarea
@@ -401,23 +358,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ mode }) => {
                         }
                     }}
                     placeholder={t('chat_placeholder')}
-                    className="flex-1 max-h-32 min-h-[50px] py-3.5 bg-transparent text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none resize-none text-base leading-relaxed"
-                    style={{ height: '52px' }}
+                    className="flex-1 max-h-32 min-h-[44px] py-2.5 md:py-3.5 px-4 bg-transparent text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none resize-none text-sm md:text-base leading-relaxed"
+                    style={{ height: '44px' }}
                 />
                 
                 {/* Send Button */}
                 <button
                     type="submit"
-                    disabled={(!input.trim() && !selectedImage) || isStreaming}
+                    disabled={(!input.trim()) || isStreaming}
                     className={`
                         p-3 mb-1 mr-1 rounded-full transition-all duration-300 shadow-lg
-                        ${(!input.trim() && !selectedImage) || isStreaming
+                        ${(!input.trim()) || isStreaming
                             ? 'bg-slate-100 text-slate-300 dark:bg-slate-700 dark:text-slate-500 shadow-none cursor-not-allowed'
                             : 'bg-gradient-to-br from-marawa-red to-red-600 text-white hover:scale-105 hover:shadow-red-500/30 active:scale-95'
                         }
                     `}
                 >
-                    {isStreaming ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} className={input.trim() ? "translate-x-0.5" : ""} />}
+                    {isStreaming ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} className={input.trim() ? "translate-x-0.5" : ""} />}
                 </button>
             </form>
             

@@ -50,6 +50,7 @@ const AppContent: React.FC = () => {
         toggleMobile={() => setMobileSidebarOpen(!isMobileSidebarOpen)}
         isDesktopCollapsed={isDesktopSidebarCollapsed}
         toggleDesktop={() => setDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+        onGoHome={() => setHasStarted(false)}
       />
       
       {/* Main Content Area */}

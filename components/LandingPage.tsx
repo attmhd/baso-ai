@@ -9,14 +9,14 @@ import {
   Sparkles, 
   Cpu,
   Globe,
-  Github,
   Twitter,
+  Github,
   Instagram,
   PenTool,
   Wand2,
-  CheckCircle2,
   MoveRight,
-  Heart
+  Heart,
+  CheckCircle2
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -27,33 +27,50 @@ interface LandingPageProps {
 const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const { t, language, setLanguage } = useLanguage();
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-yellow-500/30">
       
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-marawa-red to-marawa-gold rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-marawa-red/20">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-marawa-red to-marawa-gold rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-marawa-red/20 group-hover:scale-105 transition-transform">
               B
             </div>
             <span className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">Baso<span className="text-marawa-gold">.AI</span></span>
+          </button>
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-8">
+             <button onClick={() => scrollToSection('why')} className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-marawa-red transition-colors">
+               {t('nav_why')}
+             </button>
+             <button onClick={() => scrollToSection('features')} className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-marawa-red transition-colors">
+               {t('nav_features')}
+             </button>
           </div>
           
           <div className="flex items-center gap-6">
              {/* Language Toggles */}
-             <div className="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 border border-slate-200 dark:border-slate-700">
+             <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1 border border-slate-200 dark:border-slate-700">
                 <button 
                   onClick={() => setLanguage('id')} 
                   className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${language === 'id' ? 'bg-white dark:bg-slate-600 shadow-sm text-marawa-red' : 'text-slate-500'}`}
                 >
-                  IND
+                  ID
                 </button>
                 <button 
                   onClick={() => setLanguage('en')} 
                   className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${language === 'en' ? 'bg-white dark:bg-slate-600 shadow-sm text-marawa-red' : 'text-slate-500'}`}
                 >
-                  ENG
+                  EN
                 </button>
              </div>
 
@@ -102,9 +119,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               {t('try_btn')}
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
-            <a href="#features" className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-full font-semibold text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+            <button 
+              onClick={() => scrollToSection('features')}
+              className="px-8 py-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-full font-semibold text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all"
+            >
               {t('feature_title')}
-            </a>
+            </button>
           </div>
 
           {/* Stats / Trust */}
@@ -123,7 +143,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       </section>
 
       {/* Why Section - The Mission */}
-      <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
+      <section id="why" className="py-24 bg-slate-900 text-white relative overflow-hidden scroll-mt-24">
          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-slate-800 to-transparent opacity-50" />
          
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center relative z-10">
@@ -172,8 +192,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
-      {/* What Section - Rich Features Grid (REDESIGNED) */}
-      <section id="features" className="py-24 px-6 bg-slate-50 dark:bg-slate-950 relative">
+      {/* What Section - Rich Features Grid */}
+      <section id="features" className="py-24 px-6 bg-slate-50 dark:bg-slate-950 relative scroll-mt-24">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent" />
         
         <div className="max-w-7xl mx-auto">
@@ -195,6 +215,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               tag="Communication"
               title={t('menu_chat')}
               desc={t('menu_chat_desc')}
+              onClick={onStart}
             />
             <RichFeatureCard 
               icon={<Languages size={28} />}
@@ -203,6 +224,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               tag="Translation"
               title={t('menu_translate')}
               desc={t('menu_translate_desc')}
+              onClick={onStart}
             />
              <RichFeatureCard 
               icon={<Scale size={28} />}
@@ -211,6 +233,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               tag="Etiquette"
               title={t('menu_etiquette')}
               desc={t('menu_etiquette_desc')}
+              onClick={onStart}
             />
             <RichFeatureCard 
               icon={<PenTool size={28} />}
@@ -219,6 +242,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               tag="Creativity"
               title={t('menu_writer')}
               desc={t('menu_writer_desc')}
+              onClick={onStart}
             />
              <RichFeatureCard 
               icon={<BookOpen size={28} />}
@@ -227,6 +251,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               tag="Education"
               title={t('menu_knowledge')}
               desc={t('menu_knowledge_desc')}
+              onClick={onStart}
+            />
+            <RichFeatureCard 
+              icon={<CheckCircle2 size={28} />}
+              gradient="from-emerald-400 to-emerald-600"
+              shadowColor="shadow-emerald-500/25"
+              tag="Correction"
+              title={t('menu_grammar')}
+              desc={t('menu_grammar_desc')}
+              onClick={onStart}
             />
              <RichFeatureCard 
               icon={<Wand2 size={28} />}
@@ -235,13 +269,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               tag="Utility"
               title={t('menu_autocomplete')}
               desc={t('menu_autocomplete_desc')}
+              onClick={onStart}
+              className="md:col-span-2 lg:col-span-1 lg:col-start-2"
             />
           </div>
         </div>
       </section>
 
       {/* Footer - High Contrast Dark Theme */}
-      <footer className="pt-24 pb-12 bg-slate-900 text-slate-300 relative overflow-hidden">
+      <footer id="about" className="pt-24 pb-12 bg-slate-900 text-slate-300 relative overflow-hidden scroll-mt-24">
         {/* Subtle Marawa Glow */}
         <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-marawa-red via-marawa-gold to-marawa-black" />
         <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-marawa-gold opacity-5 blur-3xl rounded-full" />
@@ -267,20 +303,28 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
             <FooterColumn 
               title={t('footer_product')} 
-              links={[t('menu_chat'), t('menu_etiquette'), t('menu_translate'), t('menu_writer')]} 
-              action={onStart}
+              links={[
+                { label: t('menu_chat'), action: onStart },
+                { label: t('menu_etiquette'), action: onStart },
+                { label: t('menu_translate'), action: onStart },
+                { label: t('menu_writer'), action: onStart }
+              ]} 
             />
             
             <FooterColumn 
               title={t('footer_resources')} 
-              links={[t('footer_blog'), t('footer_community'), t('footer_about')]} 
+              links={[
+                 { label: t('nav_why'), action: () => scrollToSection('why') },
+                 { label: t('nav_features'), action: () => scrollToSection('features') },
+                 { label: t('footer_about'), action: () => scrollToSection('about') }
+              ]} 
             />
 
             <div className="col-span-1">
                 <h4 className="font-bold text-white mb-6">{t('support_us')}</h4>
                 <p className="text-sm text-slate-400 mb-4">{t('donate_desc')}</p>
                 <a 
-                   href="https://saweria.co/" // Replace with actual donation link
+                   href="https://saweria.co/attmhd" // Replace with actual donation link
                    target="_blank"
                    rel="noopener noreferrer"
                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-yellow-500/30 transition-all hover:-translate-y-1"
@@ -311,9 +355,11 @@ const RichFeatureCard: React.FC<{
   desc: string, 
   tag: string,
   gradient: string,
-  shadowColor: string
-}> = ({ icon, title, desc, tag, gradient, shadowColor }) => (
-  <div className={`group relative p-8 rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${shadowColor} overflow-hidden h-full flex flex-col`}>
+  shadowColor: string,
+  onClick: () => void,
+  className?: string
+}> = ({ icon, title, desc, tag, gradient, shadowColor, onClick, className = '' }) => (
+  <button onClick={onClick} className={`text-left group relative p-8 rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl ${shadowColor} overflow-hidden h-full flex flex-col w-full ${className}`}>
     
     {/* Decorative Background Blob that appears on hover */}
     <div className={`absolute -right-20 -top-20 w-64 h-64 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-10 blur-3xl transition-opacity duration-500 rounded-full`} />
@@ -347,16 +393,19 @@ const RichFeatureCard: React.FC<{
         <MoveRight size={16} className="group-hover:translate-x-1 transition-transform" />
       </div>
     </div>
-  </div>
+  </button>
 );
 
-const FooterColumn: React.FC<{title: string, links: string[], action?: () => void}> = ({ title, links, action }) => (
+const FooterColumn: React.FC<{
+  title: string, 
+  links: { label: string, action: () => void }[]
+}> = ({ title, links }) => (
   <div>
     <h4 className="font-bold text-white mb-6">{title}</h4>
     <ul className="space-y-4 text-sm text-slate-400">
       {links.map((link, i) => (
         <li key={i}>
-          <button onClick={action} className="hover:text-marawa-gold transition-colors text-left">{link}</button>
+          <button onClick={link.action} className="hover:text-marawa-gold transition-colors text-left">{link.label}</button>
         </li>
       ))}
     </ul>

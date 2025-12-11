@@ -26,6 +26,8 @@ interface SidebarProps {
   // Desktop Props
   isDesktopCollapsed: boolean;
   toggleDesktop: () => void;
+  // Navigation
+  onGoHome: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -34,7 +36,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   isMobileOpen, 
   toggleMobile,
   isDesktopCollapsed,
-  toggleDesktop
+  toggleDesktop,
+  onGoHome
 }) => {
   const { t, language, setLanguage } = useLanguage();
 
@@ -73,8 +76,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         
         {/* --- HEADER --- */}
         <div className={`flex items-center h-20 px-6 ${isDesktopCollapsed ? 'lg:justify-center lg:px-0' : 'justify-between'}`}>
-          <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap">
-            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-marawa-red to-marawa-gold rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-marawa-red/20">
+          <button 
+            onClick={onGoHome}
+            className="flex items-center gap-3 overflow-hidden whitespace-nowrap hover:opacity-80 transition-opacity text-left w-full group"
+            title="Back to Home"
+          >
+            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-marawa-red to-marawa-gold rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-marawa-red/20 group-hover:scale-105 transition-transform">
               B
             </div>
             
@@ -85,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </h1>
               <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Minang Intelligence</p>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* --- DESKTOP TOGGLE BUTTON (Absolute on border) --- */}
@@ -102,118 +109,108 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* Section Label */}
           {!isDesktopCollapsed && (
             <div className="px-3 mb-2 animate-in fade-in duration-300">
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Main Features</span>
+              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                Features
+              </span>
             </div>
           )}
-
+          
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeMode === item.mode;
             
+            // Define active color based on mode for visual variety
+            const activeColorClass = 
+                item.mode === AppMode.CHAT ? 'from-yellow-500 to-yellow-600' :
+                item.mode === AppMode.TRANSLATE ? 'from-blue-500 to-blue-600' :
+                item.mode === AppMode.WRITER ? 'from-purple-500 to-purple-600' :
+                item.mode === AppMode.KNOWLEDGE ? 'from-green-500 to-green-600' :
+                item.mode === AppMode.GRAMMAR ? 'from-emerald-500 to-emerald-600' :
+                item.mode === AppMode.AUTOCOMPLETE ? 'from-orange-500 to-orange-600' :
+                'from-marawa-red to-red-600'; // Default / Vision
+
             return (
               <button
                 key={item.mode}
                 onClick={() => {
                   setMode(item.mode);
-                  if (window.innerWidth < 1024) toggleMobile();
+                  toggleMobile(); // Close mobile menu on select
                 }}
                 className={`
-                  group relative flex items-center rounded-xl transition-all duration-300
-                  ${isDesktopCollapsed ? 'justify-center p-3' : 'px-4 py-3.5 gap-3 w-full'}
+                  w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative
                   ${isActive 
-                    ? 'bg-gradient-to-r from-marawa-red to-red-700 text-white shadow-lg shadow-red-900/30' 
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                    ? `bg-gradient-to-r ${activeColorClass} text-white shadow-lg` 
+                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
                   }
+                  ${isDesktopCollapsed ? 'justify-center px-2' : ''}
                 `}
-                title={isDesktopCollapsed ? item.label : ''}
+                title={isDesktopCollapsed ? item.label : undefined}
               >
-                {/* Icon */}
-                <Icon 
-                   size={20} 
-                   className={`flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} 
-                />
+                <div className={`flex-shrink-0 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+                   <Icon size={20} />
+                </div>
                 
-                {/* Text Label (Hidden when collapsed) */}
-                <span className={`
-                  whitespace-nowrap font-medium text-sm transition-all duration-300
-                  ${isDesktopCollapsed ? 'lg:hidden lg:w-0 opacity-0' : 'block w-auto opacity-100'}
-                `}>
-                  {item.label}
-                </span>
-
-                {/* Collapsed Tooltip (Optional visual cue) */}
-                {isDesktopCollapsed && (
-                   <div className="absolute left-full ml-4 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
-                       {item.label}
-                   </div>
+                {!isDesktopCollapsed && (
+                  <span className="font-medium text-sm truncate animate-in fade-in slide-in-from-left-2 duration-300">
+                    {item.label}
+                  </span>
+                )}
+                
+                {/* Active Indicator Line (Left) */}
+                {isActive && !isDesktopCollapsed && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white/30 rounded-r-full" />
                 )}
               </button>
             );
           })}
-
-          {/* DONATION BUTTON */}
-          <div className="pt-4 mt-2 border-t border-slate-800">
-            <a 
-               href="https://saweria.co/" // Replace with actual donation link
-               target="_blank"
-               rel="noopener noreferrer"
-               className={`
-                  group relative flex items-center rounded-xl transition-all duration-300 border border-slate-800 hover:border-yellow-500/50 hover:bg-yellow-900/10
-                  ${isDesktopCollapsed ? 'justify-center p-3' : 'px-4 py-3 gap-3 w-full'}
-                `}
-            >
-                <Coffee size={20} className="text-yellow-500" />
-                <span className={`
-                  whitespace-nowrap font-medium text-sm text-yellow-500 transition-all duration-300
-                  ${isDesktopCollapsed ? 'lg:hidden lg:w-0 opacity-0' : 'block w-auto opacity-100'}
-                `}>
-                  {t('donate_btn')}
-                </span>
-            </a>
-          </div>
-
         </nav>
 
-        {/* --- FOOTER (Lang) --- */}
-        <div className="p-4 border-t border-slate-900 bg-slate-950/50">
+        {/* --- FOOTER --- */}
+        <div className="p-4 border-t border-slate-800 bg-slate-950">
           
-          {/* Language Switcher */}
-          <div className={`flex bg-slate-900 rounded-full p-1 border border-slate-800 ${isDesktopCollapsed ? 'flex-col gap-1 rounded-xl' : ''}`}>
-             <button 
-               onClick={() => setLanguage('id')} 
-               className={`
-                 flex items-center justify-center transition-all rounded-full
-                 ${isDesktopCollapsed ? 'w-full py-2 rounded-lg text-[10px]' : 'flex-1 py-1.5 text-[11px]'}
-                 font-bold 
-                 ${language === 'id' ? 'bg-slate-800 text-marawa-gold shadow-sm ring-1 ring-slate-700' : 'text-slate-500 hover:text-slate-300'}
-               `}
-               title="Bahasa Indonesia"
-             >
-               {isDesktopCollapsed ? 'ID' : 'IND'}
-             </button>
-             <button 
-               onClick={() => setLanguage('en')} 
-               className={`
-                 flex items-center justify-center transition-all rounded-full
-                 ${isDesktopCollapsed ? 'w-full py-2 rounded-lg text-[10px]' : 'flex-1 py-1.5 text-[11px]'}
-                 font-bold
-                 ${language === 'en' ? 'bg-slate-800 text-marawa-gold shadow-sm ring-1 ring-slate-700' : 'text-slate-500 hover:text-slate-300'}
-               `}
-               title="English"
-             >
-               {isDesktopCollapsed ? 'EN' : 'ENG'}
-             </button>
+          {/* Donation Button */}
+          <a
+            href="https://saweria.co/attmhd"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`
+              flex items-center gap-3 px-3 py-3 rounded-xl bg-gradient-to-r from-yellow-900/40 to-yellow-800/40 border border-yellow-700/50 text-yellow-500 hover:bg-yellow-900/60 transition-all group
+              ${isDesktopCollapsed ? 'justify-center' : ''}
+            `}
+            title={t('donate_btn')}
+          >
+            <Coffee size={20} className="group-hover:rotate-12 transition-transform" />
+            {!isDesktopCollapsed && (
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-bold">{t('donate_btn')}</span>
+                <span className="text-[9px] opacity-70">Support Baso</span>
+              </div>
+            )}
+          </a>
+
+          {/* Language Switcher (Compact) */}
+          <div className="mt-4 flex bg-slate-900 rounded-lg p-1 border border-slate-800">
+            <button 
+              onClick={() => setLanguage('id')}
+              className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all ${language === 'id' ? 'bg-slate-700 text-white shadow' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              ID
+            </button>
+            <button 
+              onClick={() => setLanguage('en')}
+              className={`flex-1 py-1.5 text-[10px] font-bold rounded-md transition-all ${language === 'en' ? 'bg-slate-700 text-white shadow' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              EN
+            </button>
           </div>
-          
         </div>
       </aside>
 
-      {/* --- MOBILE OVERLAY (Backdrop) --- */}
+      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div 
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-30 lg:hidden animate-in fade-in duration-200"
+          className="lg:hidden fixed inset-0 z-30 bg-black/60 backdrop-blur-sm"
           onClick={toggleMobile}
-          aria-hidden="true"
         />
       )}
     </>

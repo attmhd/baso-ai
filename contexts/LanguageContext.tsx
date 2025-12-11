@@ -33,7 +33,12 @@ const translations: Record<string, Record<Language, string>> = {
   'ready_analyze': { id: 'Siap dianalisis', en: 'Ready to analyze' },
   'footer_tag': { id: 'Baso.AI • Ditenagai Gemini', en: 'Baso.AI • Gemini Powered' },
 
-  // Landing Page
+  // Landing Page Navigation
+  'nav_why': { id: 'Mengapa Baso?', en: 'Why Baso?' },
+  'nav_features': { id: 'Fitur', en: 'Features' },
+  'nav_about': { id: 'Tentang', en: 'About' },
+
+  // Landing Page Content
   'hero_tag': { id: '✨ Revolusi Pelestarian Budaya', en: '✨ Cultural Preservation Revolution' },
   'hero_title_1': { id: 'Jembatan Digital', en: 'The Digital Bridge to' },
   'hero_title_2': { id: 'Budaya Minangkabau', en: 'Minangkabau Culture' },
@@ -87,7 +92,7 @@ const translations: Record<string, Record<Language, string>> = {
   },
 
   // Chat Interface
-  'chat_placeholder': { id: 'Tanyoan apo sajo ka Baso... (Tanya apa saja)', en: 'Ask Baso anything...' },
+  'chat_placeholder': { id: 'Tanyo Baso disiko...', en: 'Ask Baso here...' },
   'chat_welcome': { id: 'Assalamualaikum! Ambo Baso. A nan bisa dibantu hari ko?', en: 'Assalamualaikum! I am Baso. How can I help you today?' },
   'chat_welcome_writer': { id: 'Selamat datang di Studio Sastra Minang. Kito nio mambuek karya apo?', en: 'Welcome to Minang Literature Studio. What masterpiece shall we create?' },
   'chat_welcome_knowledge': { id: 'Selamat datang di Pustaka Adat. Mari gali kearifan lokal kito.', en: 'Welcome to the Cultural Library. Let\'s explore our local wisdom.' },
@@ -129,7 +134,7 @@ const translations: Record<string, Record<Language, string>> = {
   // Etiquette Specific
   'etiq_title': { id: 'Cek Kato Nan Ampek', en: 'Etiquette Validator' },
   'etiq_validator_sub': { id: 'Validator Kato Nan Ampek', en: 'Kato Nan Ampek Validator' },
-  'etiq_input_placeholder': { id: 'Ketik kalimat yang ingin diuji kesopanannya...', en: 'Type sentence to validate politeness...' },
+  'etiq_input_placeholder': { id: 'Ketik kalimat...', en: 'Type sentence...' },
   'etiq_audience_label': { id: 'Siapa Lawan Bicara?', en: 'Who is the Audience?' },
   'etiq_btn': { id: 'Analisis Etika', en: 'Analyze Etiquette' },
   'etiq_analyzing': { id: 'Menganalisis Kato Nan Ampek...', en: 'Analyzing Kato Nan Ampek...' },
@@ -144,7 +149,7 @@ const translations: Record<string, Record<Language, string>> = {
   // Translator
   'trans_title': { id: 'Penerjemah Minang', en: 'Minang Translator' },
   'trans_desc': { id: 'Deteksi otomatis Indonesia/Inggris ke Minang', en: 'Auto-detect Indo/Eng to Minang' },
-  'trans_input': { id: 'Ketik teks disini...', en: 'Type text here...' },
+  'trans_input': { id: 'Ketik teks...', en: 'Type text...' },
   'trans_result': { id: 'Hasil Terjemahan', en: 'Translation Result' },
   'trans_btn': { id: 'Terjemahkan', en: 'Translate' },
   'trans_auto': { id: 'Deteksi Otomatis', en: 'Auto-Detect' },
@@ -158,8 +163,8 @@ const translations: Record<string, Record<Language, string>> = {
   'auto_title': { id: 'Lengkapi Kalimat', en: 'Autocomplete' },
   'auto_desc': { id: 'Cari ide kelanjutan kalimat.', en: 'Get ideas to finish your sentence.' },
   
-  'placeholder_grammar': { id: 'Contoh: Ambo pai ka pasa mambali lado...', en: 'Example: Ambo pai ka pasa mambali lado...' },
-  'placeholder_auto': { id: 'Mulai ketik kalimat Minang, Baso akan melengkapinya otomatis...', en: 'Start typing Minang sentence, Baso will complete it automatically...' },
+  'placeholder_grammar': { id: 'Contoh: Ambo pai...', en: 'Example: Ambo pai...' },
+  'placeholder_auto': { id: 'Ketik kalimat Minang...', en: 'Type Minang sentence...' },
   
   'tool_auto_sub': { id: 'Real-time AI Completion', en: 'Real-time AI Completion' },
   'tool_util_sub': { id: 'Alat Utilitas AI', en: 'AI Utility Tool' },

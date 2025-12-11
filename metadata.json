@@ -1,4 +1,5 @@
 {
   "name": "Baso Educator & Chat",
-  "description": "A comprehensive AI-powered Minangkabau language and culture educator featuring chat, translation, writing assistance, and multimodal analysis."
+  "description": "A comprehensive AI-powered Minangkabau language and culture educator featuring chat, translation, writing assistance, and multimodal analysis.",
+  "requestFramePermissions": []
 }

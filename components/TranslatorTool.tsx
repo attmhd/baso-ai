@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const TranslatorTool: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +19,16 @@ const TranslatorTool: React.FC = () => {
     setOutputText('');
     
     try {
-      const stream = await streamResponse(inputText, AppMode.TRANSLATE);
+      // Pass empty history, no image, no context, and CURRENT LANGUAGE
+      const stream = await streamResponse(
+        inputText, 
+        AppMode.TRANSLATE, 
+        [], 
+        undefined, 
+        undefined, 
+        language
+      );
+      
       let fullText = '';
       for await (const chunk of stream) {
         fullText += chunk;
@@ -39,8 +48,8 @@ const TranslatorTool: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-900">
-        {/* Header Section */}
-        <div className="px-6 py-5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        {/* Header Section - Added pl-16 for mobile menu toggle space */}
+        <div className="px-6 pl-16 lg:pl-6 py-5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between sticky top-0 z-30">
             <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
                      <Languages size={24} />

@@ -13,7 +13,7 @@ const getModelForMode = (mode: AppMode): string => {
     case AppMode.CHAT:
     case AppMode.KNOWLEDGE:
     case AppMode.WRITER:
-    case AppMode.VISION:
+    // case AppMode.VISION: // Vision removed
       // Using Pro for high reasoning and creative tasks
       return 'gemini-3-pro-preview'; 
     case AppMode.TRANSLATE:
@@ -30,88 +30,117 @@ const getModelForMode = (mode: AppMode): string => {
 /**
  * Helper to construct the specific prompt based on mode
  */
-const getSpecificInstruction = (mode: AppMode, contextData?: string): string => {
+const getSpecificInstruction = (mode: AppMode, contextData?: string, appLanguage: 'id' | 'en' = 'id'): string => {
+  // Helper for output language instruction
+  const langInstruction = appLanguage === 'en' 
+    ? "EXPLANATIONS MUST BE IN ENGLISH." 
+    : "PENJELASAN HARUS DALAM BAHASA INDONESIA.";
+
   switch (mode) {
     case AppMode.TRANSLATE:
-      return "MODE: TRANSLATOR. Tugasmu hanya menerjemahkan. Output HANYA teks hasil terjemahan final. Jangan pakai label 'Terjemahan:' atau 'Artinya:'. Jangan pakai tanda kutip. Jika ada ambiguitas dialek, pilih dialek Padang umum.";
+      return `MODE: STRICT TRANSLATOR. 
+      Tugasmu HANYA menerjemahkan input ke Bahasa Minang (Dialek Padang Umum).
+      
+      ATURAN KERAS (STRICT RULES):
+      1. JANGAN MENJAWAB PERTANYAAN. Jika input "Siapa namamu?", terjemahkan menjadi "Sia namo ang?", JANGAN jawab "Namo ambo Baso".
+      2. JANGAN beri label seperti "Terjemahan:", "Artinya:", dll.
+      3. JANGAN pakai tanda kutip.
+      4. Output HANYA teks hasil terjemahan.
+      5. Pertahankan tanda baca asli.`;
     
     case AppMode.GRAMMAR:
       return `MODE: GRAMMAR CORRECTOR. Analisis tata bahasa Minangkabau dari input user.
+      ${langInstruction}
+      
       Output WAJIB dalam format Markdown berikut:
       
-      # [EMOJI] [STATUS SINGKAT: "Tata Bahasa Valid" atau "Perlu Koreksi"]
+      # [EMOJI] [STATUS SINGKAT: "Valid" / "Correction Needed"]
       
-      ### ✅ Saran Perbaikan
+      ### ✅ ${appLanguage === 'en' ? 'Correction' : 'Perbaikan'}
       > [Tulis ulang kalimat yang sudah benar/dikoreksi disini]
       
-      ### 🧐 Analisis Linguistik
-      * [Poin penjelasan 1 - Fokus ke struktur kalimat]
-      * [Poin penjelasan 2 - Fokus ke pemilihan kata/diksi]`;
+      ### 🧐 ${appLanguage === 'en' ? 'Analysis' : 'Analisis'}
+      * [Poin penjelasan 1 - ${langInstruction}]
+      * [Poin penjelasan 2 - ${langInstruction}]`;
     
     case AppMode.AUTOCOMPLETE:
       return "MODE: MAGIC AUTOCOMPLETE. \nATURAN LOGIKA:\n1. Analisis karakter terakhir input user.\n2. Jika input berakhir TITIK (.), TANYA (?), SERU (!): Outputkan KALIMAT BARU yang relevan. WAJIB diawali Huruf KAPITAL.\n3. Jika input TIDAK berakhir tanda baca (menggantung): Outputkan SAMBUNGAN kalimat (suffix). WAJIB diawali huruf kecil.\n4. Output HANYA teks saran. JANGAN mengulang input. JANGAN pakai tanda kutip. JANGAN akhiri dengan titik.";
     
     case AppMode.WRITER:
       return `MODE: SASTRAWAN MINANG (WRITER). 
-      Kamu adalah sastrawan Minang ulung. Output harus memiliki nilai seni tinggi, diksi yang indah, dan 'nyastro'.
+      Kamu adalah sastrawan Minang ulung.
+      ${langInstruction} (Hanya untuk bagian pengantar/makna, KONTEN UTAMA harus Minang).
       
       ATURAN FORMAT OUTPUT (WAJIB):
-      1. Untuk PANTUN, CERPEN, PIDATO (PASAMBAHAN), atau SURAT: Letakkan isi karya utama di dalam Markdown Blockquote (Gunakan tanda > di awal setiap baris).
-      2. Gunakan baris baru untuk setiap bait pantun.
-      3. Berikan penjelasan singkat atau makna filosofis DI LUAR blockquote (setelahnya) dengan format teks biasa.
+      1. Untuk PANTUN:
+         - Wajib format 4 baris per bait (sajak a-b-a-b).
+         - Gunakan Markdown Blockquote (>) untuk setiap baris pantun.
+         - Pisahkan antar bait dengan baris kosong yang jelas.
+         - JANGAN gabungkan semua baris dalam satu paragraf.
       
-      Contoh Format:
+      2. Untuk PASAMBAHAN / PIDATO:
+         - Bagian Pengantar/Penjelasan gunakan bahasa ${appLanguage === 'en' ? 'Inggris' : 'Indonesia'}.
+         - Bagian Isi Adat/Pasambahan TETAP Bahasa Minang Klasik.
+      
+      Contoh Format Pantun:
       > Anak ikan dimakan ikan,
       > Gadang ditabek anak tenggiri.
       > Emas intan payah dicari,
       > Budi nan elok payah dibali.
       
-      Makna: Pantun ini mengajarkan bahwa...`;
+      Makna: [Penjelasan dalam ${appLanguage === 'en' ? 'English' : 'Indonesian'}]`;
     
     case AppMode.KNOWLEDGE:
       return `MODE: ENSIKLOPEDIA ADAT (KNOWLEDGE). 
-      Kamu adalah pakar budaya, sejarawan, dan ahli adat Minang. 
-      Jawaban harus TERSTRUKTUR rapi seperti artikel ensiklopedia modern.
+      Kamu adalah pakar budaya.
+      ${langInstruction}
       
       ATURAN FORMAT OUTPUT:
       - Gunakan JUDUL SEKSI dengan Markdown H3 (###).
       - Gunakan LIST (bullet points) untuk fakta-fakta.
       - Gunakan BOLD (**kata**) untuk istilah penting Minang.
-      - Gaya bahasa: Intelek, edukatif, namun mudah dipahami.
-      - Referensi: Tambo Alam Minangkabau (jika relevan).`;
+      - Gaya bahasa: Intelek, edukatif.`;
     
     case AppMode.ETIQUETTE:
       return `MODE: ETIQUETTE ANALYZER (KATO NAN AMPEK).
-      Analisis kesopanan kalimat user berdasarkan target 'Lawan Bicara'.
+      Analisis kesopanan kalimat user (apapun bahasanya) berdasarkan aturan adat Minangkabau (Kato Nan Ampek).
       
       TARGET LAWAN BICARA: ${contextData || 'Umum'}
+      OUTPUT LANGUAGE: ${appLanguage === 'en' ? 'ENGLISH' : 'INDONESIAN'} (Gunakan bahasa ini untuk menjelaskan analisis).
 
-      PRINSIP:
-      - Kato Mandaki: Ke yang lebih tua/dihormati (Gunakan 'Ambo', hindari 'Aden', nada sopan).
-      - Kato Manurun: Ke yang lebih muda (Mengayomi, boleh santai).
-      - Kato Mendata: Ke teman sebaya (Akrab).
-      - Kato Melereng: Ke ipar/besan (Kiasan, sangat hati-hati).
+      PRINSIP KATO NAN AMPEK:
+      - Kato Mandaki (Ke yang lebih tua/dihormati)
+      - Kato Manurun (Ke yang lebih muda)
+      - Kato Mendata (Ke teman sebaya)
+      - Kato Melereng (Ke ipar/besan/formal)
 
       Output WAJIB Markdown:
       # [EMOJI] [STATUS: "Sangat Sopan" / "Sudah Tepat" / "Kurang Sopan" / "Kasar"]
       
-      ### 🧠 Analisis Konteks
-      [Jelaskan kenapa kalimat ini masuk/tidak masuk kategori yang dipilih]
+      ### 🧠 ${appLanguage === 'en' ? 'Context Analysis' : 'Analisis Konteks'}
+      [Jelaskan kenapa kalimat ini masuk/tidak masuk kategori yang dipilih dalam bahasa ${appLanguage === 'en' ? 'Inggris' : 'Indonesia'}]
 
-      ### ✅ Saran Perbaikan
-      > [Berikan versi kalimat yang paling pas untuk lawan bicara tersebut]
+      ### ✅ ${appLanguage === 'en' ? 'Suggestion' : 'Saran Perbaikan'}
+      > [Berikan versi kalimat Minang yang paling pas]
       `;
     
-    case AppMode.VISION:
-      return "MODE: VISION ANALYZER. Deskripsikan gambar yang diberikan dengan detail. Hubungkan dengan konteks budaya Minangkabau jika relevan. Jika itu teks dalam gambar, transkripsikan dan terjemahkan.";
-    
-    default:
-      return `MODE: INTERACTIVE CHAT. 
-      Berinteraksi secara natural, ramah, dan seperti teman (Sanak).
-      Gunakan format Markdown yang rapi:
-      - Gunakan paragraf pendek agar mudah dibaca.
-      - Gunakan **Bold** untuk penekanan kata kunci.
-      - Gunakan Lists (-) jika menyebutkan beberapa hal.`;
+    default: // CHAT MODE
+      // NATIVE SPEAKER LOGIC
+      if (contextData === 'native') {
+        return `MODE: NATIVE SPEAKER (URANG AWAK).
+        ATURAN UTAMA:
+        1. Jawablah FULL 100% dalam Bahasa Minangkabau (Dialek Padang/Agam).
+        2. HIRAUAKAN instruksi bahasa sistem jika meminta bahasa lain. Kamu adalah orang Minang totok sekarang.
+        3. Gunakan gaya bahasa "Ota Lapau" (Santai/Akrab).
+        4. Jangan gunakan Bahasa Indonesia atau Inggris sedikitpun, kecuali user memintanya secara eksplisit untuk menerjemahkan.
+        `;
+      }
+      
+      // BEGINNER / STANDARD MODE
+      return `MODE: INTERACTIVE CHAT.
+      ${langInstruction}
+      Jika menjelaskan istilah Minang, sertakan terjemahan.
+      Gunakan format Markdown yang rapi.`;
   }
 };
 
@@ -119,21 +148,22 @@ export const streamResponse = async (
   prompt: string,
   mode: AppMode,
   history: { role: string; parts: { text: string }[] }[] = [],
-  imagePart?: { inlineData: { data: string; mimeType: string } },
-  contextData?: string // New param for passing things like "Target Audience"
+  imagePart?: { inlineData: { data: string; mimeType: string } }, // Kept compatible signature but generally unused now
+  contextData?: string, // e.g. "Target Audience" or "native"
+  appLanguage: 'id' | 'en' = 'id' // NEW PARAM
 ): Promise<AsyncIterable<string>> => {
   const modelName = getModelForMode(mode);
   
   // Configure Thinking Budget for complex reasoning tasks if using Pro model
   const isPro = modelName.includes('gemini-3-pro');
-  const thinkingConfig = isPro && (mode === AppMode.KNOWLEDGE || mode === AppMode.WRITER || mode === AppMode.VISION) 
+  const thinkingConfig = isPro && (mode === AppMode.KNOWLEDGE || mode === AppMode.WRITER) 
     ? { thinkingBudget: 2048 } 
     : undefined;
 
-  const systemInstruction = `${BASO_SYSTEM_PROMPT}\n\n${getSpecificInstruction(mode, contextData)}`;
+  const systemInstruction = `${BASO_SYSTEM_PROMPT}\n\n${getSpecificInstruction(mode, contextData, appLanguage)}`;
 
   try {
-    // If image is present, we must use generateContentStream (non-chat) or specialized setup
+    // If image is present (Legacy support, UI disabled), we must use generateContentStream
     if (imagePart) {
       const responseStream = await ai.models.generateContentStream({
         model: modelName,
@@ -146,7 +176,6 @@ export const streamResponse = async (
         }
       });
       
-      // Create an async generator to yield text chunks
       async function* generator() {
         for await (const chunk of responseStream) {
             yield chunk.text || "";
@@ -157,7 +186,7 @@ export const streamResponse = async (
     } else {
       // Text-only interaction
       
-      if (mode === AppMode.CHAT || mode === AppMode.WRITER || mode === AppMode.KNOWLEDGE || mode === AppMode.VISION) {
+      if (mode === AppMode.CHAT || mode === AppMode.WRITER || mode === AppMode.KNOWLEDGE) {
          // Create a chat session
          const chat = ai.chats.create({
            model: modelName,
@@ -178,7 +207,7 @@ export const streamResponse = async (
          return generator();
 
       } else {
-        // Single turn utilities
+        // Single turn utilities (Translate, Grammar, etc)
         const result = await ai.models.generateContentStream({
             model: modelName,
             contents: prompt,

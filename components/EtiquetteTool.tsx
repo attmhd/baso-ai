@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const EtiquetteTool: React.FC = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [input, setInput] = useState('');
     const [result, setResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +27,8 @@ const EtiquetteTool: React.FC = () => {
         try {
             // Pass the audience ID or label as contextData
             const selectedAudience = audiences.find(a => a.id === audience)?.label || 'General';
-            const stream = await streamResponse(input, AppMode.ETIQUETTE, [], undefined, selectedAudience);
+            // Pass language
+            const stream = await streamResponse(input, AppMode.ETIQUETTE, [], undefined, selectedAudience, language);
             let fullText = '';
             for await (const chunk of stream) {
                 fullText += chunk;
@@ -42,8 +43,8 @@ const EtiquetteTool: React.FC = () => {
 
     return (
         <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-900">
-            {/* Header */}
-            <div className="px-6 py-5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between sticky top-0 z-30">
+            {/* Header - Added pl-16 for mobile menu toggle space */}
+            <div className="px-6 pl-16 lg:pl-6 py-5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between sticky top-0 z-30">
                 <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
                         <Scale size={24} />
